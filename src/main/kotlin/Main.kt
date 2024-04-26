@@ -1,6 +1,6 @@
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -9,70 +9,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.res.useResource
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
+import androidx.compose.ui.window.*
 
-/**
- * Una aplicación que abrirá una ventana principal (MainWindow) con un texto que indique que está en la Ventana principal y un botón para abrir una segunda ventana (SecondWindow). Los dos componentes se mostrarán centrados vertical y horizontalmente, uno encima de otro con una separación entre ambos de 100 dp. El botón de la función principal debe abrir la ventana secundaria y cerrarse.
-
- * La segunda ventana tendrá una disposición similar, pero indicando que se encuentra en la ventana secundaria. El botón debe volver a abrir la ventana principal y cerrarse.
-
- * Una función main() dónde directamente no se cree ninguna ventana (Window), sino que llame a funciones composables, que dentro de ellas creen dichas ventanas.
-
- * La función Composable MainWindow() deberá tener los parámetros necesarios para recibir un icono (BitmapPainter), un tamaño de la ventana (WindowState), qué hacer en el onClose de la ventana y qué hacer en el click del botón.
-
- * La función Composable SecondWindow() deberá ser similar.
-
- * En la función main() está todos los estados elevados (State Hosting) y además deberá comprobar si las dos ventanas están cerradas hará un exit de la aplicación.
- * */
 @Composable
-@Preview
-fun App() {
-
-
-
-}
-@Composable
-fun primeraVentana(text: String, segundaPantalla: Boolean, cambiarPantallaOnButtonClick:()->Unit ){
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        /**
+         * Función para crear y mostrar la primera ventana de la aplicación.
+         *
+         * @param text Texto a mostrar en la ventana.
+         * @param icon Icono de la ventana.
+         * @param cerrarPantallaOnCloseRequest Función que se llama cuando se solicita cerrar la ventana.
+         * @param cambiarPantallaOnButtonClick Función que se llama cuando se hace clic en el botón para cambiar de ventana.
+         */
+fun primeraVentana(
+    text: String,
+    icon: BitmapPainter,
+    cerrarPantallaonCloseResquest: () -> Unit,
+    cambiarPantallaOnButtonClick: () -> Unit
+) {
+    Window(
+        onCloseRequest = cerrarPantallaonCloseResquest,
+        title = "primera ventana",
+        icon = icon,
+        resizable = false,
+        state = WindowState(
+            position = WindowPosition(300.dp, 400.dp),
+            size = DpSize(600.dp, 400.dp)
+        )
     ) {
-        Text(
-            text = text,
-            modifier = Modifier
-        )
-        Spacer(
-            modifier = Modifier.size(100.dp)
-        )
-        Button(onClick =cambiarPantallaOnButtonClick ) {
-            Text(text)
-        }
-    }
-}
-@Composable
-fun segundaPantalla(){
-
-}
-
-fun main() = application {
-    var text by remember { mutableStateOf("esta es la primera ventana") }
-    var segundaPantalla by remember { mutableStateOf(false) }
-    if (!segundaPantalla)
-
-    Window(onCloseRequest = ::exitApplication) {
-        primeraVentana(text,segundaPantalla){
-            segundaPantalla = true
-            text = "esta es la segunda pantalla"
-        }
-
-    }
-    else
-        segundaPantalla()
-        Window(onCloseRequest = ::exitApplication) {
-
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Color.Gray
+        ) {
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -85,12 +58,91 @@ fun main() = application {
                 Spacer(
                     modifier = Modifier.size(100.dp)
                 )
-                Button(onClick = {
-                    segundaPantalla = false
-                    text = "esta es la primera pantalla"
-                }) {
+                Button(onClick = cambiarPantallaOnButtonClick) {
                     Text(text)
                 }
             }
         }
+    }
+}
+
+
+@Composable
+        /**
+         * Función para crear y mostrar la segunda pantalla de la aplicación.
+         *
+         * @param text Texto a mostrar en la ventana.
+         * @param icon Icono de la ventana.
+         * @param cambiarVentanaOnButtonClick Función que se llama cuando se hace clic en el botón para cambiar de ventana.
+         * @param cerrarPantallaOnCloseRequest Función que se llama cuando se solicita cerrar la ventana.
+         */
+fun segundaPantalla(
+    text: String,
+    icon: BitmapPainter,
+    cambiarVentanaonButtonClick: () -> Unit,
+    cerrarPantallaonCloseResquest: () -> Unit
+) {
+    Window(
+        onCloseRequest = cerrarPantallaonCloseResquest,
+        title = "Segunda ventana",
+        icon = icon,
+        resizable = false,
+        state = WindowState(
+            position = WindowPosition(0.dp, 0.dp),
+            size = DpSize(300.dp, 400.dp)
+        )
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Color.Gray
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = text,
+                    modifier = Modifier
+                )
+                Spacer(
+                    modifier = Modifier.size(100.dp)
+                )
+                Button(onClick = cambiarVentanaonButtonClick) {
+                    Text(text)
+                }
+            }
+        }
+    }
+}
+
+fun main() = application {
+    val icon = BitmapPainter(useResource("troy.png", ::loadImageBitmap))
+    var text by remember { mutableStateOf("esta es la primera ventana") }
+    var segundaPantalla by remember { mutableStateOf(false) }
+    var primerpantalla by remember { mutableStateOf(true) }
+    if (!segundaPantalla) {
+        primeraVentana(
+            text = text,
+            icon,
+            cerrarPantallaonCloseResquest = { primerpantalla = false },
+            cambiarPantallaOnButtonClick = {
+                segundaPantalla = true
+                primerpantalla = false
+                text = "esta es la segunda pantalla"
+            })
+
+    } else
+        segundaPantalla(
+            text = text,
+            icon,
+            cambiarVentanaonButtonClick = {
+                segundaPantalla = false
+                primerpantalla = true
+                text = "esta es la primera pantalla"
+            },
+            cerrarPantallaonCloseResquest = { segundaPantalla = false })
+
+    if (!primerpantalla && !segundaPantalla)
+        exitApplication()
 }
